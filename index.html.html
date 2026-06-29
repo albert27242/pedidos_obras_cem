@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedidos por obra · CEM Esquina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+/* ===== TOKENS CEM ===== */
+:root {
+  --cem-azul:         #0e5a9e;
+  --cem-azul-oscuro:  #0a4278;
+  --cem-azul-medio:   #1a72c4;
+  --cem-azul-claro:   #d6e8f7;
+  --cem-azul-suave:   #eef4fb;
+  --cem-ocre:         #b8863d;
+  --cem-ocre-oscuro:  #8f6430;
+  --cem-ocre-claro:   #f5e6cc;
+  --cem-papel:        #f8f5ee;
+  --cem-gris-texto:   #2c2c2c;
+  --cem-gris-medio:   #5a5a5a;
+  --cem-gris-suave:   #8a8a8a;
+  --cem-gris-borde:   #d4cfc6;
+  --cem-gris-fondo:   #eeebe3;
+  --cem-verde:        #2e7d4f;
+  --cem-verde-claro:  #d4eddf;
+  --cem-rojo:         #c0392b;
+  --cem-rojo-claro:   #fce8e6;
+  --cem-amarillo:     #d4820a;
+  --cem-amarillo-claro: #fef3d7;
+  --font-sans:  'IBM Plex Sans', sans-serif;
+  --font-serif: 'IBM Plex Serif', serif;
+  --font-mono:  'IBM Plex Mono', monospace;
+  --space-1: 4px;  --space-2: 8px;   --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px;  --space-7: 48px; --space-8: 64px;
+  --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px;
+  --shadow-sm: 0 1px 3px rgba(14,90,158,0.08);
+  --shadow-md: 0 3px 8px rgba(14,90,158,0.12);
+  --shadow-lg: 0 8px 24px rgba(14,90,158,0.15);
+}
+
+/* ===== RESET ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  background: var(--cem-papel);
+  color: var(--cem-gris-texto);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* ===== HEADER ===== */
+header {
+  background: var(--cem-azul);
+  color: white;
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.header-marca {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.header-sep { opacity: 0.4; margin: 0 var(--space-2); }
+.header-herramienta {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+.header-sub {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  opacity: 0.7;
+  margin-left: var(--space-2);
+}
+
+/* ===== MAIN ===== */
+main {
+  flex: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-4);
+  width: 100%;
+}
+
+/* ===== CONEXIÓN ===== */
+#estado-conexion {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 12px;
+  color: var(--cem-gris-medio);
+  margin-bottom: var(--space-5);
+  font-family: var(--font-sans);
+}
+.punto {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--cem-gris-suave);
+  flex-shrink: 0;
+}
+#estado-conexion.ok .punto { background: var(--cem-verde); }
+#estado-conexion.error .punto { background: var(--cem-rojo); }
+#estado-conexion.cargando .punto {
+  background: var(--cem-amarillo);
+  animation: parpadeo 1s infinite;
+}
+@keyframes parpadeo { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+/* ===== KPI GRID ===== */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.kpi-card {
+  background: white;
+  border: 1px solid var(--cem-gris-borde);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4);
+  text-align: center;
+}
+.kpi-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--cem-gris-medio);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-2);
+}
+.kpi-numero {
+  font-family: var(--font-mono);
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--cem-azul);
+  font-variant-numeric: tabular-nums;
+}
+.kpi-numero.azul  { color: var(--cem-azul); }
+.kpi-numero.amarillo { color: var(--cem-amarillo); }
+.kpi-numero.verde { color: var(--cem-verde); }
+.kpi-numero.ocre  { color: var(--cem-ocre); }
+
+/* ===== SECCIONES / CARDS ===== */
+.section-card {
+  background: white;
+  border: 1px solid var(--cem-gris-borde);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  margin-bottom: var(--space-5);
+}
+.section-header {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--cem-gris-borde);
+  background: var(--cem-azul-suave);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.section-header h2 {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cem-azul);
+}
+.section-body { padding: var(--space-4) var(--space-5); }
+
+/* ===== FORMULARIO ===== */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: var(--space-4);
+}
+@media (max-width: 720px) { .form-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } }
+.col-full { grid-column: 1 / -1; }
+.col-2 { grid-column: span 2; }
+@media (max-width: 480px) { .col-2 { grid-column: 1 / -1; } }
+
+.campo { display: flex; flex-direction: column; gap: var(--space-1); }
+label {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--cem-gris-texto);
+}
+label .req { color: var(--cem-rojo); margin-left: 2px; }
+input, select, textarea {
+  width: 100%;
+  padding: 10px var(--space-3);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--cem-gris-texto);
+  background: white;
+  border: 1px solid var(--cem-gris-borde);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--cem-azul);
+  box-shadow: 0 0 0 3px rgba(14,90,158,0.12);
+}
+input::placeholder, textarea::placeholder { color: var(--cem-gris-suave); }
+select {
+  appearance: none;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="%235a5a5a" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+textarea { resize: vertical; min-height: 60px; }
+
+.form-acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--cem-gris-borde);
+  flex-wrap: wrap;
+}
+
+/* ===== BOTONES ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 10px var(--space-5);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+.btn i { width: 15px; height: 15px; stroke-width: 1.75; }
+.btn-primario { background: var(--cem-azul); color: white; }
+.btn-primario:hover { background: var(--cem-azul-oscuro); }
+.btn-secundario { background: transparent; color: var(--cem-azul); border: 1.5px solid var(--cem-azul); }
+.btn-secundario:hover { background: var(--cem-azul-suave); }
+.btn-destructivo { background: var(--cem-rojo); color: white; }
+.btn-destructivo:hover { opacity: 0.88; }
+.btn-mini {
+  padding: 5px var(--space-3);
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-sans);
+  transition: opacity 0.2s, background 0.2s;
+}
+.btn-mini i { width: 13px; height: 13px; stroke-width: 1.75; }
+.btn-mini-editar { background: var(--cem-azul-claro); color: var(--cem-azul-oscuro); }
+.btn-mini-editar:hover { background: var(--cem-azul); color: white; }
+.btn-mini-eliminar { background: var(--cem-rojo-claro); color: var(--cem-rojo); }
+.btn-mini-eliminar:hover { background: var(--cem-rojo); color: white; }
+
+/* ===== BOTONES FOTO ===== */
+.btn-foto {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 8px var(--space-4);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--cem-gris-borde);
+  background: white;
+  color: var(--cem-gris-medio);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-foto:hover {
+  border-color: var(--cem-azul);
+  color: var(--cem-azul);
+  background: var(--cem-azul-suave);
+}
+.btn-foto i { width: 16px; height: 16px; stroke-width: 1.75; }
+.btn-foto.activo {
+  background: var(--cem-azul);
+  color: white;
+  border-color: var(--cem-azul);
+}
+
+/* ===== PREVIEW FOTOS ===== */
+.fotos-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.foto-item {
+  position: relative;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--cem-gris-borde);
+  background: var(--cem-gris-fondo);
+  aspect-ratio: 4/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.foto-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.foto-item .foto-eliminar {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--cem-rojo);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.foto-item:hover .foto-eliminar { opacity: 1; }
+.foto-item .foto-eliminar:hover { background: #a93226; }
+.foto-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--cem-gris-suave);
+  font-size: 12px;
+}
+.foto-placeholder i { width: 24px; height: 24px; stroke-width: 1.5; }
+
+/* ===== INPUT FILE OCULTO ===== */
+input[type="file"] {
+  display: none;
+}
+
+/* ===== FILTROS ===== */
+.filtros {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+  align-items: flex-end;
+}
+.filtros .campo { min-width: 160px; }
+.filtros .campo-busqueda { flex: 1; min-width: 200px; }
+
+/* ===== TABLA ===== */
+.tabla-wrap { overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+  font-size: 14px;
+}
+thead tr { background: var(--cem-azul); }
+th {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  color: white;
+}
+th.num { text-align: right; }
+tbody tr { border-bottom: 1px solid var(--cem-gris-borde); }
+tbody tr:nth-child(even) { background: var(--cem-azul-suave); }
+tbody tr:hover td { background: var(--cem-azul-claro); transition: background 0.15s; }
+td { padding: var(--space-3) var(--space-4); color: var(--cem-gris-texto); vertical-align: middle; }
+td.num {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+}
+td.mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+td.obs { max-width: 160px; color: var(--cem-gris-medio); font-size: 13px; }
+.fila-acciones { display: flex; gap: var(--space-2); }
+
+/* ===== BADGES ===== */
+.badge {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+.badge-pedido    { background: var(--cem-azul-claro);    color: var(--cem-azul-oscuro); }
+.badge-pendiente { background: var(--cem-amarillo-claro); color: var(--cem-amarillo); }
+.badge-entregado { background: var(--cem-verde-claro);   color: var(--cem-verde); }
+.badge-obras     { background: var(--cem-gris-fondo);    color: var(--cem-gris-medio); }
+.badge-servicios { background: var(--cem-ocre-claro);    color: var(--cem-ocre-oscuro); }
+
+/* ===== VACÍO ===== */
+.vacio {
+  text-align: center;
+  padding: var(--space-7) var(--space-5);
+  color: var(--cem-gris-suave);
+  font-size: 14px;
+}
+
+/* ===== LEYENDA ===== */
+.leyenda {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--cem-gris-medio);
+  margin-top: var(--space-3);
+}
+
+/* ===== TOAST ===== */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  opacity: 0;
+  background: var(--cem-gris-texto);
+  color: white;
+  padding: 10px var(--space-4);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  transition: opacity .25s, transform .25s;
+  pointer-events: none;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.ok   { background: var(--cem-verde); }
+#toast.err  { background: var(--cem-rojo); }
+
+/* ===== MODAL FOTO ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.modal-overlay.activo { opacity: 1; pointer-events: all; }
+.modal-contenido {
+  background: white;
+  border-radius: var(--radius-lg);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: hidden;
+  position: relative;
+}
+.modal-contenido img {
+  max-width: 90vw;
+  max-height: 85vh;
+  display: block;
+}
+.modal-cerrar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: background 0.2s;
+}
+.modal-cerrar:hover { background: rgba(0,0,0,0.8); }
+
+/* ===== FOOTER ===== */
+footer {
+  background: var(--cem-azul-oscuro);
+  color: rgba(255,255,255,0.65);
+  text-align: center;
+  padding: var(--space-4);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  margin-top: auto;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <i data-lucide="building-2" style="width:20px;height:20px;stroke-width:1.75;color:rgba(255,255,255,0.85);" aria-label="Municipalidad"></i>
+  <span class="header-marca">CEM <span class="header-sub">Centro Estadístico Municipal · Esquina</span></span>
+  <span class="header-sep">›</span>
+  <span class="header-herramienta">Pedidos por obra</span>
+</header>
+
+<main>
+
+  <!-- ESTADO CONEXIÓN -->
+  <div id="estado-conexion" class="cargando">
+    <span class="punto"></span>
+    <span id="estado-texto">Conectando con Google Sheets...</span>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi-card"><div class="kpi-label">Total de pedidos</div><div class="kpi-numero azul" id="kpi-total">—</div></div>
+    <div class="kpi-card"><div class="kpi-label">Pedido</div><div class="kpi-numero azul" id="kpi-pedido">—</div></div>
+    <div class="kpi-card"><div class="kpi-label">Pendiente</div><div class="kpi-numero amarillo" id="kpi-pendiente">—</div></div>
+    <div class="kpi-card"><div class="kpi-label">Entregado</div><div class="kpi-numero verde" id="kpi-entregado">—</div></div>
+  </div>
+
+  <!-- FORMULARIO -->
+  <div class="section-card">
+    <div class="section-header">
+      <i data-lucide="file-plus" style="width:16px;height:16px;stroke-width:1.75;color:var(--cem-azul);" aria-label="Nuevo pedido"></i>
+      <h2 id="form-titulo">Nuevo pedido</h2>
+    </div>
+    <div class="section-body">
+      <form id="form-pedido">
+        <input type="hidden" id="pedido-id">
+        <div class="form-grid">
+
+          <div class="campo">
+            <label for="fecha">Fecha <span class="req">*</span></label>
+            <input type="date" id="fecha" required>
+          </div>
+
+          <div class="campo">
+            <label for="numero-pedido">Número de pedido <span class="req">*</span></label>
+            <input type="text" id="numero-pedido" placeholder="Ej: 0001" required>
+          </div>
+
+          <div class="campo">
+            <label for="area">Área solicitante <span class="req">*</span></label>
+            <select id="area" required>
+              <option value="">Seleccioná el área</option>
+              <option value="Obras Públicas">Obras Públicas</option>
+              <option value="Servicios Públicos">Servicios Públicos</option>
+              <option value="Planificación y Ejecución">Planificación y Ejecución</option>
+              <option value="Corralones">Corralones</option>
+              <option value="Taller Municipal y Flotas">Taller Municipal y Flotas</option>
+              <option value="Higiene Urbana">Higiene Urbana</option>
+              <option value="Barrido y Mantenimiento de Calles">Barrido y Mantenimiento de Calles</option>
+              <option value="Recolección de Residuos">Recolección de Residuos</option>
+              <option value="Parques y Paseos">Parques y Paseos</option>
+              <option value="Vivero Municipal">Vivero Municipal</option>
+              <option value="Alumbrado Público">Alumbrado Público</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="orden-compra">Orden de compra</label>
+            <input type="text" id="orden-compra" placeholder="Ej: OC-2026-014">
+          </div>
+
+          <div class="campo">
+            <label for="proveedor">Proveedor <span class="req">*</span></label>
+            <input type="text" id="proveedor" placeholder="Nombre del proveedor" required>
+          </div>
+
+          <div class="campo">
+            <label for="remito">Número de remito</label>
+            <input type="text" id="remito" placeholder="Ej: 00045">
+          </div>
+
+          <div class="campo">
+            <label for="importe">Importe ($ ARS)</label>
+            <input type="number" id="importe" step="0.01" min="0" placeholder="0,00">
+          </div>
+
+          <div class="campo">
+            <label for="estado">Estado <span class="req">*</span></label>
+            <select id="estado" required>
+              <option value="Pedido">Pedido</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Entregado">Entregado</option>
+            </select>
+          </div>
+
+          <div class="campo col-full">
+            <label for="observaciones">Observaciones adicionales (opcional)</label>
+            <textarea id="observaciones" placeholder="Detalles adicionales sobre el pedido..."></textarea>
+          </div>
+
+          <!-- ===== FOTOS DE FACTURA ===== -->
+          <div class="campo col-full">
+            <label>Fotos de factura / remito</label>
+            <div style="display:flex; gap:var(--space-3); flex-wrap:wrap; margin-bottom:var(--space-2);">
+              <button type="button" class="btn-foto" id="btn-adjuntar" onclick="document.getElementById('input-adjuntar').click()">
+                <i data-lucide="paperclip"></i> Adjuntar foto
+              </button>
+              <button type="button" class="btn-foto" id="btn-camara" onclick="document.getElementById('input-camara').click()">
+                <i data-lucide="camera"></i> Tomar foto
+              </button>
+            </div>
+            <input type="file" id="input-adjuntar" accept="image/*" multiple onchange="procesarFotos(this)">
+            <input type="file" id="input-camara" accept="image/*" capture="environment" onchange="procesarFotos(this)">
+            <div class="fotos-preview" id="fotos-preview"></div>
+            <input type="hidden" id="fotos-base64" value="">
+          </div>
+
+        </div>
+
+        <div class="form-acciones">
+          <button type="button" class="btn btn-secundario" id="btn-cancelar" style="display:none;">
+            <i data-lucide="x"></i> Cancelar edición
+          </button>
+          <button type="submit" class="btn btn-primario" id="btn-guardar">
+            <i data-lucide="save"></i> Guardar pedido
+          </button>
+        </div>
+      </form>
+      <p class="leyenda"><span style="color:var(--cem-rojo);">*</span> Campo obligatorio.</p>
+    </div>
+  </div>
+
+  <!-- LISTADO -->
+  <div class="section-card">
+    <div class="section-header">
+      <i data-lucide="list" style="width:16px;height:16px;stroke-width:1.75;color:var(--cem-azul);" aria-label="Listado"></i>
+      <h2>Listado de pedidos</h2>
+    </div>
+    <div class="section-body">
+
+      <div class="filtros">
+        <div class="campo">
+          <label for="filtro-area">Área solicitante</label>
+          <select id="filtro-area">
+            <option value="">Todas las áreas</option>
+            <option value="Obras Públicas">Obras Públicas</option>
+            <option value="Servicios Públicos">Servicios Públicos</option>
+            <option value="Planificación y Ejecución">Planificación y Ejecución</option>
+            <option value="Corralones">Corralones</option>
+            <option value="Taller Municipal y Flotas">Taller Municipal y Flotas</option>
+            <option value="Higiene Urbana">Higiene Urbana</option>
+            <option value="Barrido y Mantenimiento de Calles">Barrido y Mantenimiento de Calles</option>
+            <option value="Recolección de Residuos">Recolección de Residuos</option>
+            <option value="Parques y Paseos">Parques y Paseos</option>
+            <option value="Vivero Municipal">Vivero Municipal</option>
+            <option value="Alumbrado Público">Alumbrado Público</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="filtro-estado">Estado</label>
+          <select id="filtro-estado">
+            <option value="">Todos los estados</option>
+            <option value="Pedido">Pedido</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="Entregado">Entregado</option>
+          </select>
+        </div>
+        <div class="campo campo-busqueda">
+          <label for="filtro-texto">Buscar</label>
+          <input type="text" id="filtro-texto" placeholder="Proveedor, N° pedido, remito...">
+        </div>
+        <div style="padding-bottom:1px;">
+          <button type="button" class="btn btn-secundario" id="btn-exportar" style="padding:10px var(--space-4);">
+            <i data-lucide="download"></i> Exportar CSV
+          </button>
+        </div>
+      </div>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>N° pedido</th>
+              <th>Área solicitante</th>
+              <th>Orden de compra</th>
+              <th>Proveedor</th>
+              <th>N° remito</th>
+              <th class="num">Importe</th>
+              <th>Observaciones</th>
+              <th>Estado</th>
+              <th>Fotos</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="vacio" id="vacio" style="display:none;">Todavía no hay pedidos registrados para esta búsqueda.</div>
+
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Centro Estadístico Municipal · Municipalidad de Esquina · Corrientes
+</footer>
+
+<div id="toast"></div>
+
+<!-- MODAL PARA VER FOTOS -->
+<div class="modal-overlay" id="modal-foto" onclick="cerrarModal(event)">
+  <div class="modal-contenido" onclick="event.stopPropagation()">
+    <button class="modal-cerrar" onclick="cerrarModal()">×</button>
+    <img id="modal-img" src="" alt="Foto de factura">
+  </div>
+</div>
+
+<script>
+// ====== CONFIGURACIÓN GOOGLE APPS SCRIPT ======
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyjEcXPAkdg5g1UyifOXuxgeC2pEaVfpTY4WTCou-yq1lf1gYKL6GwbMQhTrCS23V3n/exec';
+// =============================================
+
+let pedidos = [];
+let guardando = false;
+let fotosTemp = []; // Array de objetos {id, base64, nombre}
+
+// ===== CONEXIÓN =====
+function setConexion(estado, texto) {
+  const el = document.getElementById('estado-conexion');
+  el.className = estado;
+  document.getElementById('estado-texto').textContent = texto;
+}
+
+async function cargarPedidos() {
+  setConexion('cargando', 'Cargando datos desde Google Sheets...');
+  try {
+    const r = await fetch(GAS_URL + '?action=get');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    if (data.success) {
+      pedidos = data.pedidos || [];
+      const ahora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+      setConexion('ok', `Conectado a Google Sheets · ${pedidos.length} pedidos · ${ahora}`);
+    } else {
+      throw new Error(data.message || 'Error del servidor');
+    }
+  } catch (err) {
+    setConexion('error', 'Sin conexión con Google Sheets. Verificá tu red.');
+    pedidos = [];
+  }
+}
+
+async function guardarEnNube(datos) {
+  setConexion('cargando', 'Guardando en Google Sheets...');
+  try {
+    const r = await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(datos)
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    if (data.success) {
+      await cargarPedidos();
+      return true;
+    } else {
+      throw new Error(data.message || 'Error al guardar');
+    }
+  } catch (err) {
+    setConexion('error', 'No se pudo guardar. Revisá tu conexión.');
+    return false;
+  }
+}
+
+async function eliminarEnNube(id) {
+  setConexion('cargando', 'Eliminando de Google Sheets...');
+  try {
+    const r = await fetch(GAS_URL + '?action=delete&id=' + encodeURIComponent(id));
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    if (data.success) {
+      const ahora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+      setConexion('ok', `Eliminado de Google Sheets · ${ahora}`);
+      return true;
+    } else {
+      throw new Error(data.message || 'Error al eliminar');
+    }
+  } catch (err) {
+    setConexion('error', 'No se pudo eliminar. Revisá tu conexión.');
+    return false;
+  }
+}
+
+// ===== FOTOS =====
+function procesarFotos(input) {
+  const archivos = Array.from(input.files);
+  if (!archivos.length) return;
+
+  archivos.forEach(archivo => {
+    if (!archivo.type.startsWith('image/')) {
+      toast('Solo se permiten archivos de imagen.', 'err');
+      return;
+    }
+    if (archivo.size > 5 * 1024 * 1024) {
+      toast('La imagen no puede superar los 5 MB.', 'err');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const id = 'foto_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      fotosTemp.push({
+        id: id,
+        base64: e.target.result,
+        nombre: archivo.name
+      });
+      renderFotosPreview();
+    };
+    reader.readAsDataURL(archivo);
+  });
+
+  input.value = '';
+}
+
+function renderFotosPreview() {
+  const cont = document.getElementById('fotos-preview');
+  if (fotosTemp.length === 0) {
+    cont.innerHTML = '';
+    return;
+  }
+
+  cont.innerHTML = fotosTemp.map((f, idx) => `
+    <div class="foto-item">
+      <img src="${f.base64}" alt="Foto ${idx + 1}" onclick="verFotoModal('${f.base64}')" style="cursor:pointer;">
+      <button class="foto-eliminar" onclick="eliminarFotoTemp('${f.id}')" title="Eliminar">×</button>
+    </div>
+  `).join('');
+
+  // Actualizar input hidden con JSON de fotos
+  document.getElementById('fotos-base64').value = JSON.stringify(fotosTemp.map(f => ({ id: f.id, base64: f.base64 })));
+}
+
+function eliminarFotoTemp(id) {
+  fotosTemp = fotosTemp.filter(f => f.id !== id);
+  renderFotosPreview();
+}
+
+function verFotoModal(base64) {
+  document.getElementById('modal-img').src = base64;
+  document.getElementById('modal-foto').classList.add('activo');
+}
+
+function cerrarModal(e) {
+  if (e && e.target !== document.getElementById('modal-foto')) return;
+  document.getElementById('modal-foto').classList.remove('activo');
+}
+
+function renderFotosEnTabla(fotosJson) {
+  if (!fotosJson) return '<span style="color:var(--cem-gris-suave);font-size:12px;">—</span>';
+  try {
+    const fotos = JSON.parse(fotosJson);
+    if (!Array.isArray(fotos) || fotos.length === 0) return '<span style="color:var(--cem-gris-suave);font-size:12px;">—</span>';
+    return `<div style="display:flex;gap:4px;flex-wrap:wrap;">
+      ${fotos.map((f, i) => `
+        <img src="${f.base64}" 
+             onclick="verFotoModal('${f.base64}')" 
+             style="width:40px;height:40px;object-fit:cover;border-radius:4px;cursor:pointer;border:1px solid var(--cem-gris-borde);"
+             title="Foto ${i + 1}">
+      `).join('')}
+    </div>`;
+  } catch (e) {
+    return '<span style="color:var(--cem-gris-suave);font-size:12px;">—</span>';
+  }
+}
+
+// ===== UTILIDADES =====
+function esc(s) {
+  return String(s ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+}
+function fmtFecha(iso) {
+  if (!iso) return '';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+function fmtImporte(v) {
+  const n = Number(v) || 0;
+  return '$ ' + n.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function toast(msg, tipo = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + tipo;
+  setTimeout(() => el.className = '', 3000);
+}
+
+// ===== KPIs =====
+function actualizarKPIs() {
+  document.getElementById('kpi-total').textContent = pedidos.length;
+  document.getElementById('kpi-pedido').textContent = pedidos.filter(p => p.estado === 'Pedido').length;
+  document.getElementById('kpi-pendiente').textContent = pedidos.filter(p => p.estado === 'Pendiente').length;
+  document.getElementById('kpi-entregado').textContent = pedidos.filter(p => p.estado === 'Entregado').length;
+}
+
+// ===== TABLA =====
+function filtrados() {
+  const area   = document.getElementById('filtro-area').value;
+  const estado = document.getElementById('filtro-estado').value;
+  const txt    = document.getElementById('filtro-texto').value.trim().toLowerCase();
+  return pedidos.filter(p => {
+    if (area   && p.area   !== area)   return false;
+    if (estado && p.estado !== estado) return false;
+    if (txt) {
+      const haystack = `${p.numeroPedido} ${p.proveedor} ${p.remito} ${p.ordenCompra}`.toLowerCase();
+      if (!haystack.includes(txt)) return false;
+    }
+    return true;
+  }).sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+}
+
+function badgeEstado(e) {
+  const cls = { Pedido: 'badge-pedido', Pendiente: 'badge-pendiente', Entregado: 'badge-entregado' };
+  return `<span class="badge ${cls[e] || 'badge-pedido'}">${esc(e)}</span>`;
+}
+function badgeArea(a) {
+  const cls = a === 'Servicios Públicos' ? 'badge-servicios' : 'badge-obras';
+  return `<span class="badge ${cls}">${esc(a)}</span>`;
+}
+
+function renderTabla() {
+  const rows = filtrados();
+  const tbody = document.getElementById('tbody');
+  const vacio = document.getElementById('vacio');
+  if (rows.length === 0) {
+    tbody.innerHTML = '';
+    vacio.style.display = 'block';
+  } else {
+    vacio.style.display = 'none';
+    tbody.innerHTML = rows.map(p => `
+      <tr>
+        <td class="mono">${fmtFecha(p.fecha)}</td>
+        <td class="mono">${esc(p.numeroPedido)}</td>
+        <td>${badgeArea(p.area)}</td>
+        <td class="mono">${esc(p.ordenCompra) || '—'}</td>
+        <td>${esc(p.proveedor)}</td>
+        <td class="mono">${esc(p.remito) || '—'}</td>
+        <td class="num">${fmtImporte(p.importe)}</td>
+        <td class="obs">${esc(p.observaciones) || '—'}</td>
+        <td>${badgeEstado(p.estado)}</td>
+        <td>${renderFotosEnTabla(p.fotos)}</td>
+        <td>
+          <div class="fila-acciones">
+            <button class="btn-mini btn-mini-editar" onclick="editarPedido('${p.id}')">
+              <i data-lucide="pencil"></i> Editar
+            </button>
+            <button class="btn-mini btn-mini-eliminar" onclick="eliminarPedido('${p.id}')">
+              <i data-lucide="trash-2"></i> Eliminar
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+  actualizarKPIs();
+  lucide.createIcons();
+}
+
+// ===== FORMULARIO =====
+function limpiar() {
+  document.getElementById('form-pedido').reset();
+  document.getElementById('pedido-id').value = '';
+  document.getElementById('fecha').valueAsDate = new Date();
+  document.getElementById('form-titulo').textContent = 'Nuevo pedido';
+  document.getElementById('btn-guardar').innerHTML = '<i data-lucide="save"></i> Guardar pedido';
+  document.getElementById('btn-cancelar').style.display = 'none';
+  fotosTemp = [];
+  renderFotosPreview();
+  lucide.createIcons();
+}
+
+function editarPedido(id) {
+  const p = pedidos.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('pedido-id').value = p.id;
+  document.getElementById('fecha').value = p.fecha;
+  document.getElementById('numero-pedido').value = p.numeroPedido;
+  document.getElementById('area').value = p.area;
+  document.getElementById('orden-compra').value = p.ordenCompra;
+  document.getElementById('proveedor').value = p.proveedor;
+  document.getElementById('remito').value = p.remito;
+  document.getElementById('importe').value = p.importe;
+  document.getElementById('observaciones').value = p.observaciones;
+  document.getElementById('estado').value = p.estado;
+
+  // Cargar fotos existentes
+  fotosTemp = [];
+  if (p.fotos) {
+    try {
+      const fotosExistentes = JSON.parse(p.fotos);
+      if (Array.isArray(fotosExistentes)) {
+        fotosTemp = fotosExistentes.map((f, i) => ({
+          id: f.id || ('foto_existente_' + i),
+          base64: f.base64,
+          nombre: 'Foto existente'
+        }));
+      }
+    } catch (e) { /* ignorar */ }
+  }
+  renderFotosPreview();
+
+  document.getElementById('form-titulo').textContent = 'Editar pedido';
+  document.getElementById('btn-guardar').innerHTML = '<i data-lucide="check"></i> Guardar cambios';
+  document.getElementById('btn-cancelar').style.display = 'inline-flex';
+  lucide.createIcons();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function eliminarPedido(id) {
+  if (!confirm('¿Eliminás este pedido? Esta acción no se puede deshacer.')) return;
+  const respaldo = pedidos;
+  pedidos = pedidos.filter(p => p.id !== id);
+  renderTabla();
+  const ok = await eliminarEnNube(id);
+  if (ok) {
+    toast('El pedido fue eliminado.', 'ok');
+  } else {
+    pedidos = respaldo;
+    renderTabla();
+    toast('No se pudo eliminar. Intentá de nuevo.', 'err');
+  }
+}
+
+document.getElementById('form-pedido').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if (guardando) return;
+  guardando = true;
+
+  const id = document.getElementById('pedido-id').value;
+  const datos = {
+    action: id ? 'update' : 'create',
+    id: id || 'p_' + Date.now(),
+    fecha:        document.getElementById('fecha').value,
+    numeroPedido: document.getElementById('numero-pedido').value.trim(),
+    area:         document.getElementById('area').value,
+    ordenCompra:  document.getElementById('orden-compra').value.trim(),
+    proveedor:    document.getElementById('proveedor').value.trim(),
+    remito:       document.getElementById('remito').value.trim(),
+    importe:      parseFloat(document.getElementById('importe').value) || 0,
+    observaciones:document.getElementById('observaciones').value.trim(),
+    estado:       document.getElementById('estado').value,
+    fotos:        document.getElementById('fotos-base64').value
+  };
+
+  const respaldo = pedidos;
+  if (id) {
+    const idx = pedidos.findIndex(p => p.id === id);
+    if (idx !== -1) pedidos[idx] = datos;
+  } else {
+    pedidos = [...pedidos, datos];
+  }
+
+  const ok = await guardarEnNube(datos);
+  if (ok) {
+    toast(id ? 'Los datos fueron actualizados.' : 'El registro fue guardado correctamente.', 'ok');
+    limpiar();
+    renderTabla();
+  } else {
+    pedidos = respaldo;
+    renderTabla();
+    toast('No se pudo guardar. Revisá tu conexión.', 'err');
+  }
+  guardando = false;
+});
+
+document.getElementById('btn-cancelar').addEventListener('click', limpiar);
+document.getElementById('filtro-area').addEventListener('change', renderTabla);
+document.getElementById('filtro-estado').addEventListener('change', renderTabla);
+document.getElementById('filtro-texto').addEventListener('input', renderTabla);
+
+// ===== EXPORTAR CSV =====
+document.getElementById('btn-exportar').addEventListener('click', () => {
+  const rows = filtrados();
+  if (!rows.length) { toast('No hay pedidos para exportar.', 'err'); return; }
+  const cols = ['Fecha','N° pedido','Área solicitante','Orden de compra','Proveedor','N° remito','Importe','Observaciones','Estado','Cantidad de fotos'];
+  const data = rows.map(p => {
+    let cantFotos = 0;
+    try { cantFotos = p.fotos ? JSON.parse(p.fotos).length : 0; } catch (e) {}
+    return [
+      fmtFecha(p.fecha), p.numeroPedido, p.area, p.ordenCompra, p.proveedor, p.remito,
+      p.importe, (p.observaciones||'').replaceAll('
+',' '), p.estado, cantFotos
+    ];
+  });
+  const csv = [cols,...data].map(r => r.map(c => `"${String(c??'').replaceAll('"','""')}"`).join(';')).join('
+');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'}));
+  a.download = `pedidos_obra_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+});
+
+// ===== INICIO =====
+async function iniciar() {
+  limpiar();
+  await cargarPedidos();
+  renderTabla();
+}
+iniciar();
+
+// Actualización automática cada 20 segundos
+setInterval(async () => {
+  if (guardando) return;
+  await cargarPedidos();
+  renderTabla();
+}, 20000);
+</script>
+</body>
+</html>
